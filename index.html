@@ -1,1 +1,1174 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Average Citizen</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background: url('https://i.postimg.cc/HLVzWCSZ/42a631410c32047dbcffab258544a7c0.jpg') center center / cover no-repeat;
+            height: 100%;
+            overflow: hidden;
+            user-select: none;
+            position: relative;
+        }
 
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(135, 206, 235, 0.3) 0%, rgba(152, 251, 152, 0.3) 100%);
+            z-index: 1;
+        }
+
+        .game-container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            z-index: 2;
+        }
+
+        .top-bar {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+
+        .top-button {
+            background: #C0C0C0;
+            border: 2px outset #C0C0C0;
+            padding: 5px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            color: black;
+        }
+
+        .top-button:hover {
+            background: #E0E0E0;
+        }
+
+
+
+        .stats-panel {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            background: #C0C0C0;
+            border: 2px inset #C0C0C0;
+            padding: 15px;
+            font-size: 14px;
+            min-width: 220px;
+        }
+
+        .shop-panel {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background: #C0C0C0;
+            border: 2px inset #C0C0C0;
+            padding: 20px;
+            font-size: 16px;
+            min-width: 250px;
+        }
+
+        .shop-item {
+            background: #E0E0E0;
+            border: 1px outset #C0C0C0;
+            padding: 10px 15px;
+            margin: 8px 0;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .shop-item:hover {
+            background: #F0F0F0;
+        }
+
+        .shop-item:active {
+            border: 1px inset #C0C0C0;
+        }
+
+        .achievements-panel {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: #C0C0C0;
+            border: 2px inset #C0C0C0;
+            padding: 20px;
+            font-size: 16px;
+            max-width: 300px;
+            min-width: 280px;
+        }
+
+        .achievement {
+            padding: 2px 0;
+            color: #666;
+        }
+
+        .achievement.completed {
+            color: #008000;
+            font-weight: bold;
+        }
+
+        .floating-text {
+            position: absolute;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 200;
+            animation: floatUp 2s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+
+        .clickable-object {
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .clickable-object:hover {
+            transform: scale(1.1);
+        }
+
+
+
+        .mini-event-popup {
+            position: fixed;
+            top: 120px;
+            left: 20px;
+            background: #FFFF99;
+            border: 2px solid #000;
+            padding: 15px;
+            max-width: 280px;
+            z-index: 150;
+            font-size: 14px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        .day-phase {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #C0C0C0;
+            border: 2px inset #C0C0C0;
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .dialogue-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #C0C0C0;
+            border: 2px inset #C0C0C0;
+            padding: 20px;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .dialogue-text {
+            margin-bottom: 15px;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .choices {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .choice-button {
+            background: #C0C0C0;
+            border: 2px outset #C0C0C0;
+            padding: 8px 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .choice-button:hover {
+            background: #E0E0E0;
+        }
+
+        .choice-button:active {
+            border: 2px inset #C0C0C0;
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #C0C0C0;
+            border: 3px outset #C0C0C0;
+            padding: 30px;
+            z-index: 1000;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 4px 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .popup-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .popup-button {
+            background: #C0C0C0;
+            border: 2px outset #C0C0C0;
+            padding: 8px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .popup-button:hover {
+            background: #E0E0E0;
+        }
+
+        .stat-bar {
+            background: #808080;
+            height: 12px;
+            border: 1px inset #C0C0C0;
+            margin: 5px 0;
+            position: relative;
+        }
+
+        .stat-fill {
+            background: #00FF00;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .energy-fill { background: #FFD700; }
+        .mood-fill { background: #FF69B4; }
+
+        .day-night {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            transition: background 2s ease;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="game-container">
+   <div class="day-night" id="dayNight"></div>
+   <div class="top-bar"><a href="https://pump.fun" target="_blank" rel="noopener noreferrer" class="top-button">X</a> <a href="https://pump.fun" target="_blank" rel="noopener noreferrer" class="top-button">pump.fun</a>
+   </div>
+   <div style="position: absolute; top: 80px; left: 50%; transform: translateX(-50%); font-family: 'Courier New', monospace; font-size: 32px; font-weight: bold; color: #000; text-shadow: 2px 2px 0px #FFF, -1px -1px 0px #808080; z-index: 50;">
+    AVERAGE CITIZEN
+   </div>
+   <div class="day-phase" id="dayPhase">
+    Morning
+   </div>
+   <div class="stats-panel">
+    <div>
+     <strong>Day:</strong> <span id="dayCounter">1</span>
+    </div>
+    <div>
+     <strong>Money:</strong> $<span id="money">50</span>
+    </div>
+    <div style="margin: 10px 0;">
+     <div>
+      <strong>Energy:</strong> <span id="energyText">80</span>%
+     </div>
+     <div class="stat-bar">
+      <div class="stat-fill energy-fill" id="energyBar" style="width: 80%"></div>
+     </div>
+    </div>
+    <div style="margin: 10px 0;">
+     <div>
+      <strong>Mood:</strong> <span id="moodText">70</span>%
+     </div>
+     <div class="stat-bar">
+      <div class="stat-fill mood-fill" id="moodBar" style="width: 70%"></div>
+     </div>
+    </div>
+    <div>
+     <div>
+      <strong>Health:</strong> <span id="healthText">85</span>%
+     </div>
+     <div class="stat-bar">
+      <div class="stat-fill" id="healthBar" style="width: 85%; background: #FF6B6B;"></div>
+     </div>
+    </div>
+   </div>
+   <div class="shop-panel">
+    <div style="font-weight: bold; margin-bottom: 10px;">
+     🏪 SHOP
+    </div>
+    <div class="shop-item" onclick="buyItem('food')"><span>🍔 Food</span> <span>$15</span>
+    </div>
+    <div class="shop-item" onclick="buyItem('coffee')"><span>☕ Coffee</span> <span>$8</span>
+    </div>
+    <div class="shop-item" onclick="buyItem('lottery')"><span>🎫 Lottery</span> <span>$5</span>
+    </div>
+    <div class="shop-item" onclick="buyItem('medicine')"><span>💊 Medicine</span> <span>$25</span>
+    </div>
+   </div>
+   <div class="achievements-panel">
+    <div style="font-weight: bold; margin-bottom: 8px;">
+     🏆 GOALS
+    </div>
+    <div class="achievement" id="achievement-days">
+     Survive 5 days
+    </div>
+    <div class="achievement" id="achievement-money">
+     Reach $100
+    </div>
+    <div class="achievement" id="achievement-sleep">
+     Sleep 3 times
+    </div>
+    <div class="achievement" id="achievement-work">
+     Work 10 times
+    </div>
+    <div class="achievement" id="achievement-easter">
+     Find 3 secrets
+    </div>
+   </div>
+   <div class="dialogue-panel">
+    <div class="dialogue-text" id="dialogueText">
+     It's Monday morning. The alarm screams at you like capitalism itself. What will you do?
+    </div>
+    <div class="choices" id="choices"><button class="choice-button" onclick="makeChoice('work')">Go to Work</button> <button class="choice-button" onclick="makeChoice('coffee')">Buy Coffee</button> <button class="choice-button" onclick="makeChoice('bed')">Stay in Bed</button>
+    </div>
+   </div>
+  </div>
+  <script>
+        // Game state
+        let gameState = {
+            day: 1,
+            money: 50,
+            energy: 80,
+            mood: 70,
+            health: 85,
+            decisionsCount: 0,
+            gameOver: false,
+            dayPhase: 'morning', // morning, work, evening
+            sleepCount: 0,
+            workCount: 0,
+            easterEggsFound: [],
+            achievements: {
+                days: false,
+                money: false,
+                sleep: false,
+                work: false,
+                easter: false
+            },
+            lastMiniEvent: 0,
+            delayedConsequences: []
+        };
+
+        // Random events that can happen
+        const randomEvents = [
+            "Your landlord raised rent again. Surprise!",
+            "Your boss is having a bad day. Everyone suffers.",
+            "The internet bill doubled. Because reasons.",
+            "Your coffee machine broke. Tragedy strikes.",
+            "A friend asks to borrow money. Again.",
+            "Your phone screen cracked. Life is pain.",
+            "The grocery store raised prices. Inflation hits.",
+            "Your car needs repairs. Wallet screams."
+        ];
+
+        // Day phase scenarios
+        const dayPhaseScenarios = {
+            morning: [
+                {
+                    text: "You woke up late. The alarm has been screaming for 20 minutes. Your boss will not be pleased.",
+                    choices: [
+                        { text: "Rush to Work", action: "rush_work" },
+                        { text: "Call in Sick", action: "fake_sick" },
+                        { text: "Go Back to Sleep", action: "sleep_more" }
+                    ]
+                },
+                {
+                    text: "Morning routine time. You look in the mirror and question your life choices.",
+                    choices: [
+                        { text: "Shower & Coffee", action: "morning_routine" },
+                        { text: "Skip Everything", action: "skip_routine" },
+                        { text: "Existential Crisis", action: "crisis" }
+                    ]
+                }
+            ],
+            work: [
+                {
+                    text: "Your boss storms over. 'Why is this report late?' They're clearly having a bad day.",
+                    choices: [
+                        { text: "Apologize Profusely", action: "apologize" },
+                        { text: "Blame Technology", action: "blame_tech" },
+                        { text: "Stand Your Ground", action: "defend" }
+                    ]
+                },
+                {
+                    text: "Coworker asks you to cover their shift. Again. They promise to 'owe you one.'",
+                    choices: [
+                        { text: "Help Them Out", action: "help_coworker" },
+                        { text: "Politely Decline", action: "decline_help" },
+                        { text: "Demand Payment", action: "demand_payment" }
+                    ]
+                }
+            ],
+            evening: [
+                {
+                    text: "Work is over. You have 3 hours of freedom before sleep. How do you spend it?",
+                    choices: [
+                        { text: "Go Out with Friends", action: "go_out" },
+                        { text: "Stay Home & Netflix", action: "stay_home" },
+                        { text: "Side Project", action: "side_project" }
+                    ]
+                },
+                {
+                    text: "Your neighbor is playing loud music. It's 11 PM and you need sleep.",
+                    choices: [
+                        { text: "Knock on Door", action: "confront_neighbor" },
+                        { text: "Call Landlord", action: "call_landlord" },
+                        { text: "Suffer in Silence", action: "suffer_silence" }
+                    ]
+                }
+            ]
+        };
+
+        // Interactive dialog events
+        const dialogEvents = [
+            {
+                character: "Neighbor Bob",
+                text: "Hey! Can you lend me $20? My car broke down and I need gas money.",
+                choices: [
+                    { text: "Sure, here you go", action: "lend_money", cost: 20, mood: 5 },
+                    { text: "Sorry, I'm broke too", action: "refuse_politely", mood: -2 },
+                    { text: "Get a job, Bob!", action: "be_rude", mood: -5, energy: 5 }
+                ]
+            },
+            {
+                character: "Coworker Sarah",
+                text: "Did you hear? They're laying people off next month. I'm so stressed!",
+                choices: [
+                    { text: "We'll get through this", action: "comfort", mood: 10, energy: -5 },
+                    { text: "Every person for themselves", action: "selfish", mood: -10, energy: 5 },
+                    { text: "Let's update our resumes", action: "practical", mood: 0, energy: -10 }
+                ]
+            },
+            {
+                character: "Street Vendor",
+                text: "Fresh hot dogs! Only $3! You look hungry, friend.",
+                choices: [
+                    { text: "I'll take one", action: "buy_hotdog", cost: 3, energy: 10, health: -5 },
+                    { text: "No thanks", action: "decline_food", mood: -2 },
+                    { text: "Do you take credit?", action: "joke", mood: 5 }
+                ]
+            }
+        ];
+
+        // Mini events that happen automatically
+        const miniEvents = [
+            {
+                text: "Internet is down — cannot work from home today!",
+                effects: { energy: -10, mood: -15 },
+                choices: [
+                    { text: "Go to Office", action: "office_backup" },
+                    { text: "Take Day Off", action: "day_off" }
+                ]
+            },
+            {
+                text: "You found $5 on the street!",
+                effects: { money: 5, mood: 10 },
+                choices: [{ text: "Lucky day!", action: "celebrate" }]
+            },
+            {
+                text: "Lottery ticket you bought last week won $50!",
+                effects: { money: 50, mood: 25 },
+                choices: [{ text: "Jackpot!", action: "celebrate" }]
+            },
+            {
+                text: "Police knock on your door — noise complaint from neighbor.",
+                effects: { mood: -20 },
+                choices: [
+                    { text: "Pay Fine ($30)", action: "pay_fine", cost: 30 },
+                    { text: "Try to Bribe ($50)", action: "bribe", cost: 50 }
+                ]
+            },
+            {
+                text: "Your phone battery died during important call!",
+                effects: { mood: -10, energy: -5 },
+                choices: [{ text: "Technology hates me", action: "tech_problems" }]
+            },
+            {
+                text: "Free pizza at work today!",
+                effects: { mood: 15, energy: 10, health: -5 },
+                choices: [{ text: "Nom nom nom", action: "eat_pizza" }]
+            }
+        ];
+
+        // Choice outcomes
+        const outcomes = {
+            work: {
+                text: "You earned money but lost your soul. Energy -20, Money +30. The grind continues.",
+                money: 30,
+                energy: -20,
+                mood: -5
+            },
+            coffee: {
+                text: "You feel better but your wallet cries. Mood +15, Money -8. Caffeine is life.",
+                money: -8,
+                energy: 10,
+                mood: 15
+            },
+            bed: {
+                text: "You stayed cozy but bills don't pay themselves. Energy +10, Money -5. Reality knocks.",
+                money: -5,
+                energy: 10,
+                mood: 5
+            },
+            overtime: {
+                text: "More money, less life. The eternal trade-off. Money +50, Energy -30, Mood -10.",
+                money: 50,
+                energy: -30,
+                mood: -10
+            },
+            treat: {
+                text: "You bought happiness. It was temporary. Money -25, Mood +20, Energy -5.",
+                money: -25,
+                energy: -5,
+                mood: 20
+            },
+            contemplate: {
+                text: "Deep thoughts achieved nothing. But hey, at least you tried. Mood +5, Energy -5.",
+                money: 0,
+                energy: -5,
+                mood: 5
+            },
+            hustle: {
+                text: "Side hustle activated! You're now tired but slightly richer. Money +20, Energy -25.",
+                money: 20,
+                energy: -25,
+                mood: 0
+            },
+            cry: {
+                text: "Tears were shed. Surprisingly therapeutic. Mood +10, Energy -10.",
+                money: 0,
+                energy: -10,
+                mood: 10
+            },
+            bank: {
+                text: "You checked your balance. Mistake. Mood -15, but knowledge is power?",
+                money: 0,
+                energy: 0,
+                mood: -15
+            },
+            void: {
+                text: "The void embraced you back. Strangely comforting. Mood +5, Energy +5.",
+                money: 0,
+                energy: 5,
+                mood: 5
+            },
+            retail: {
+                text: "Shopping therapy engaged. Your credit card disagrees. Money -40, Mood +25.",
+                money: -40,
+                energy: 0,
+                mood: 25
+            },
+            mom: {
+                text: "Mom gave life advice and cookies. Mood +30, Energy +15. Moms are magic.",
+                money: 0,
+                energy: 15,
+                mood: 30
+            },
+            power: {
+                text: "You powered through like a champion. Money +25, Energy -15, Mood +10.",
+                money: 25,
+                energy: -15,
+                mood: 10
+            },
+            plan: {
+                text: "Weekend plans made! Hope is restored. Mood +20, Energy +5.",
+                money: 0,
+                energy: 5,
+                mood: 20
+            },
+            question: {
+                text: "You questioned everything. No answers found. Mood -5, but wisdom +1?",
+                money: 0,
+                energy: 0,
+                mood: -5
+            }
+        };
+
+        function updateDisplay() {
+            document.getElementById('dayCounter').textContent = gameState.day;
+            document.getElementById('money').textContent = gameState.money;
+            document.getElementById('energyText').textContent = Math.max(0, gameState.energy);
+            document.getElementById('moodText').textContent = Math.max(0, gameState.mood);
+            document.getElementById('healthText').textContent = Math.max(0, gameState.health);
+            
+            document.getElementById('energyBar').style.width = Math.max(0, gameState.energy) + '%';
+            document.getElementById('moodBar').style.width = Math.max(0, gameState.mood) + '%';
+            document.getElementById('healthBar').style.width = Math.max(0, gameState.health) + '%';
+            
+            // Update day phase
+            document.getElementById('dayPhase').textContent = gameState.dayPhase.charAt(0).toUpperCase() + gameState.dayPhase.slice(1);
+            
+            // Update dynamic background based on day phase
+            const dayNight = document.getElementById('dayNight');
+            let bgColor = '';
+            
+            switch(gameState.dayPhase) {
+                case 'morning': bgColor = 'rgba(255, 220, 150, 0.2)'; break;
+                case 'work': bgColor = 'rgba(100, 150, 255, 0.15)'; break;
+                case 'evening': bgColor = 'rgba(255, 100, 50, 0.25)'; break;
+            }
+            
+            dayNight.style.background = bgColor;
+            
+            // Check achievements
+            checkAchievements();
+        }
+
+        function checkAchievements() {
+            if (gameState.day >= 5 && !gameState.achievements.days) {
+                gameState.achievements.days = true;
+                document.getElementById('achievement-days').classList.add('completed');
+                showFloatingText('🏆 Survived 5 days!', 'center');
+            }
+            
+            if (gameState.money >= 100 && !gameState.achievements.money) {
+                gameState.achievements.money = true;
+                document.getElementById('achievement-money').classList.add('completed');
+                showFloatingText('🏆 Rich citizen!', 'center');
+            }
+            
+            if (gameState.sleepCount >= 3 && !gameState.achievements.sleep) {
+                gameState.achievements.sleep = true;
+                document.getElementById('achievement-sleep').classList.add('completed');
+                showFloatingText('🏆 Sleep master!', 'center');
+            }
+            
+            if (gameState.workCount >= 10 && !gameState.achievements.work) {
+                gameState.achievements.work = true;
+                document.getElementById('achievement-work').classList.add('completed');
+                showFloatingText('🏆 Workaholic!', 'center');
+            }
+            
+            if (gameState.easterEggsFound.length >= 3 && !gameState.achievements.easter) {
+                gameState.achievements.easter = true;
+                document.getElementById('achievement-easter').classList.add('completed');
+                showFloatingText('🏆 Secret finder!', 'center');
+            }
+        }
+
+        function showFloatingText(text, position = 'random', color = '#00FF00') {
+            const floatingText = document.createElement('div');
+            floatingText.className = 'floating-text';
+            floatingText.textContent = text;
+            floatingText.style.color = color;
+            
+            if (position === 'center') {
+                floatingText.style.left = '50%';
+                floatingText.style.top = '40%';
+                floatingText.style.transform = 'translateX(-50%)';
+            } else {
+                floatingText.style.left = Math.random() * 80 + 10 + '%';
+                floatingText.style.top = Math.random() * 60 + 20 + '%';
+            }
+            
+            document.body.appendChild(floatingText);
+            
+            setTimeout(() => {
+                if (floatingText.parentNode) {
+                    floatingText.parentNode.removeChild(floatingText);
+                }
+            }, 2000);
+        }
+
+        function buyItem(item) {
+            const items = {
+                food: { cost: 15, energy: 25, health: 10, text: '+Energy +Health' },
+                coffee: { cost: 8, mood: 15, energy: 10, text: '+Mood +Energy' },
+                lottery: { cost: 5, text: 'Maybe lucky?' },
+                medicine: { cost: 25, health: 30, text: '+Health' }
+            };
+            
+            const itemData = items[item];
+            if (!itemData || gameState.money < itemData.cost) {
+                showFloatingText('Not enough money!', 'random', '#FF0000');
+                return;
+            }
+            
+            gameState.money -= itemData.cost;
+            showFloatingText(`-$${itemData.cost}`, 'random', '#FF0000');
+            
+            if (itemData.energy) {
+                gameState.energy = Math.min(100, gameState.energy + itemData.energy);
+            }
+            if (itemData.mood) {
+                gameState.mood = Math.min(100, gameState.mood + itemData.mood);
+            }
+            if (itemData.health) {
+                gameState.health = Math.min(100, gameState.health + itemData.health);
+            }
+            
+            if (item === 'lottery') {
+                if (Math.random() < 0.1) { // 10% chance to win
+                    const winAmount = Math.floor(Math.random() * 50) + 10;
+                    gameState.money += winAmount;
+                    showFloatingText(`Won $${winAmount}!`, 'random', '#FFD700');
+                } else {
+                    showFloatingText('No luck this time', 'random', '#666');
+                }
+            } else {
+                showFloatingText(itemData.text, 'random', '#00FF00');
+            }
+            
+            updateDisplay();
+        }
+
+        function easterEgg(type) {
+            if (gameState.easterEggsFound.includes(type)) {
+                showFloatingText('Already found!', 'random', '#666');
+                return;
+            }
+            
+            gameState.easterEggsFound.push(type);
+            
+            const easterEggs = {
+                lamp: { money: 5, text: 'Found $5 in the lamp!' },
+                book: { mood: 10, text: 'Life is meaningless but you try anyway' },
+                cat: { energy: 15, text: 'Cat purrs give you energy' },
+                tv: { mood: -5, text: 'News is depressing as usual' },
+                plant: { health: 5, text: 'Nature heals the soul' }
+            };
+            
+            const egg = easterEggs[type];
+            if (egg.money) gameState.money += egg.money;
+            if (egg.mood) gameState.mood = Math.max(0, Math.min(100, gameState.mood + egg.mood));
+            if (egg.energy) gameState.energy = Math.max(0, Math.min(100, gameState.energy + egg.energy));
+            if (egg.health) gameState.health = Math.max(0, Math.min(100, gameState.health + egg.health));
+            
+            showFloatingText(egg.text, 'random', '#FFD700');
+            updateDisplay();
+        }
+
+        function triggerMiniEvent() {
+            const now = Date.now();
+            if (now - gameState.lastMiniEvent < 8000) return; // 8 second cooldown
+            
+            if (Math.random() < 0.3) { // 30% chance
+                const event = miniEvents[Math.floor(Math.random() * miniEvents.length)];
+                gameState.lastMiniEvent = now;
+                
+                // Apply immediate effects
+                Object.keys(event.effects).forEach(key => {
+                    gameState[key] = Math.max(0, Math.min(100, gameState[key] + event.effects[key]));
+                });
+                
+                showMiniEventPopup(event);
+                updateDisplay();
+            }
+        }
+
+        function showMiniEventPopup(event) {
+            const popup = document.createElement('div');
+            popup.className = 'mini-event-popup';
+            popup.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 10px;">📢 RANDOM EVENT</div>
+                <div style="margin-bottom: 10px;">${event.text}</div>
+                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                    ${event.choices.map(choice => 
+                        `<button class="choice-button" style="font-size: 10px; padding: 4px 8px;" onclick="handleMiniChoice('${choice.action}', ${choice.cost || 0}); this.parentElement.parentElement.remove();">${choice.text}</button>`
+                    ).join('')}
+                </div>
+            `;
+            
+            document.body.appendChild(popup);
+            
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    popup.parentNode.removeChild(popup);
+                }
+            }, 8000);
+        }
+
+        function handleMiniChoice(action, cost = 0) {
+            if (cost > 0 && gameState.money >= cost) {
+                gameState.money -= cost;
+                showFloatingText(`-$${cost}`, 'random', '#FF0000');
+            } else if (cost > 0) {
+                showFloatingText('Not enough money!', 'random', '#FF0000');
+                return;
+            }
+            
+            // Handle specific mini event actions
+            const actionEffects = {
+                office_backup: { energy: -15, mood: -10 },
+                day_off: { energy: 10, mood: 5, money: -30 },
+                celebrate: { mood: 5 },
+                pay_fine: { mood: -5 },
+                bribe: { mood: 10 },
+                tech_problems: { mood: -5 },
+                eat_pizza: { mood: 5 }
+            };
+            
+            const effects = actionEffects[action];
+            if (effects) {
+                Object.keys(effects).forEach(key => {
+                    gameState[key] = Math.max(0, Math.min(100, gameState[key] + effects[key]));
+                });
+            }
+            
+            updateDisplay();
+        }
+
+        function triggerDialogEvent() {
+            if (Math.random() < 0.2) { // 20% chance
+                const event = dialogEvents[Math.floor(Math.random() * dialogEvents.length)];
+                showDialogPopup(event);
+            }
+        }
+
+        function showDialogPopup(event) {
+            const popup = document.createElement('div');
+            popup.className = 'popup-backdrop';
+            popup.innerHTML = `
+                <div class="popup">
+                    <h3 style="margin-top: 0;">${event.character}</h3>
+                    <div style="margin: 15px 0;">${event.text}</div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                        ${event.choices.map((choice, index) => 
+                            `<button class="popup-button" onclick="handleDialogChoice(${index}, '${event.character}'); this.parentElement.parentElement.parentElement.remove();">${choice.text}</button>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(popup);
+        }
+
+        function handleDialogChoice(choiceIndex, character) {
+            const event = dialogEvents.find(e => e.character === character);
+            const choice = event.choices[choiceIndex];
+            
+            if (choice.cost && gameState.money >= choice.cost) {
+                gameState.money -= choice.cost;
+                showFloatingText(`-$${choice.cost}`, 'random', '#FF0000');
+            } else if (choice.cost) {
+                showFloatingText('Not enough money!', 'random', '#FF0000');
+                return;
+            }
+            
+            if (choice.mood) {
+                gameState.mood = Math.max(0, Math.min(100, gameState.mood + choice.mood));
+            }
+            if (choice.energy) {
+                gameState.energy = Math.max(0, Math.min(100, gameState.energy + choice.energy));
+            }
+            if (choice.health) {
+                gameState.health = Math.max(0, Math.min(100, gameState.health + choice.health));
+            }
+            
+            updateDisplay();
+        }
+
+        function showPopup(message, callback) {
+            const backdrop = document.createElement('div');
+            backdrop.className = 'popup-backdrop';
+            
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.innerHTML = `
+                <div style="margin-bottom: 20px; font-size: 16px; line-height: 1.4;">${message}</div>
+                <button class="popup-button" onclick="closePopup()">Continue</button>
+            `;
+            
+            document.body.appendChild(backdrop);
+            document.body.appendChild(popup);
+            
+            window.closePopup = function() {
+                document.body.removeChild(backdrop);
+                document.body.removeChild(popup);
+                if (callback) callback();
+            };
+        }
+
+        function makeChoice(action) {
+            if (gameState.gameOver) return;
+            
+            // Handle new day phase actions
+            const newActions = {
+                rush_work: { money: 20, energy: -25, mood: -10, health: -5, text: "You rushed to work, stressed and exhausted. Boss noticed you were late anyway." },
+                fake_sick: { money: -10, energy: 15, mood: 5, health: -10, text: "Called in sick. Guilt eats at you but the extra sleep was nice." },
+                sleep_more: { energy: 20, mood: 10, money: -20, text: "Went back to sleep. Blissful but your boss called 6 times." },
+                morning_routine: { energy: 10, mood: 15, health: 5, text: "Proper morning routine. You feel human again." },
+                skip_routine: { energy: -5, mood: -5, health: -5, text: "Skipped everything. You smell and feel terrible." },
+                crisis: { mood: -15, energy: -10, text: "Existential crisis achieved. Nothing matters anyway." },
+                apologize: { mood: -5, energy: -5, text: "You apologized profusely. Boss seemed satisfied with your groveling." },
+                blame_tech: { mood: 5, energy: 0, text: "Blamed the computer. Classic move. Boss bought it... maybe." },
+                defend: { mood: 10, energy: -10, text: "Stood your ground. Boss was surprised. Respect earned?" },
+                help_coworker: { mood: 10, energy: -15, money: 0, text: "Helped coworker. They'll probably forget this favor by tomorrow." },
+                decline_help: { mood: -5, energy: 5, text: "Declined politely. Self-preservation activated." },
+                demand_payment: { mood: 0, energy: 0, money: 15, text: "Demanded payment. Coworker grudgingly agreed." },
+                go_out: { mood: 20, energy: -20, money: -25, health: -5, text: "Went out with friends. Fun but expensive and tiring." },
+                stay_home: { mood: 5, energy: 10, text: "Netflix and chill. Alone. Again." },
+                side_project: { mood: 15, energy: -10, money: 5, text: "Worked on side project. Maybe it'll pay off someday." },
+                confront_neighbor: { mood: -10, energy: -5, text: "Confronted neighbor. They turned music up louder out of spite." },
+                call_landlord: { mood: 5, energy: -5, text: "Called landlord. They said they'll 'look into it.' Sure they will." },
+                suffer_silence: { mood: -15, energy: -10, health: -5, text: "Suffered in silence. Your mental health deteriorates." }
+            };
+            
+            // Check if it's a new action or old action
+            let outcome = newActions[action] || outcomes[action];
+            if (!outcome) return;
+            
+            // Track specific actions
+            if (['rush_work', 'help_coworker', 'work', 'overtime'].includes(action)) {
+                gameState.workCount++;
+            }
+            if (['sleep_more', 'stay_home'].includes(action)) {
+                gameState.sleepCount++;
+            }
+            
+            // Apply outcome
+            gameState.money += outcome.money || 0;
+            gameState.energy += outcome.energy || 0;
+            gameState.mood += outcome.mood || 0;
+            gameState.health += outcome.health || 0;
+            gameState.decisionsCount++;
+            
+            // Clamp values
+            gameState.energy = Math.max(0, Math.min(100, gameState.energy));
+            gameState.mood = Math.max(0, Math.min(100, gameState.mood));
+            gameState.health = Math.max(0, Math.min(100, gameState.health));
+            
+            updateDisplay();
+            
+            showPopup(outcome.text, () => {
+                // Trigger random events
+                triggerDialogEvent();
+                nextPhase();
+            });
+        }
+
+        function nextPhase() {
+            // Cycle through day phases
+            if (gameState.dayPhase === 'morning') {
+                gameState.dayPhase = 'work';
+            } else if (gameState.dayPhase === 'work') {
+                gameState.dayPhase = 'evening';
+            } else {
+                gameState.dayPhase = 'morning';
+                gameState.day++;
+            }
+            
+            // Check for game over conditions
+            if (gameState.decisionsCount >= 15 || gameState.energy <= 0 || gameState.mood <= 0 || gameState.health <= 0 || gameState.money <= -150) {
+                endGame();
+                return;
+            }
+            
+            updateDisplay();
+            
+            // Set new scenario based on day phase
+            const scenarios = dayPhaseScenarios[gameState.dayPhase];
+            const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+            
+            document.getElementById('dialogueText').textContent = scenario.text;
+            
+            const choicesDiv = document.getElementById('choices');
+            choicesDiv.innerHTML = '';
+            
+            scenario.choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.className = 'choice-button';
+                button.textContent = choice.text;
+                button.onclick = () => makeChoice(choice.action);
+                choicesDiv.appendChild(button);
+            });
+        }
+
+        function nextDay() {
+            gameState.day++;
+            
+            // Check for game over conditions
+            if (gameState.decisionsCount >= 8 || gameState.energy <= 0 || gameState.mood <= 0 || gameState.money <= -100) {
+                endGame();
+                return;
+            }
+            
+            updateDisplay();
+            
+            // Set new scenario
+            const scenarioIndex = Math.min(gameState.day - 1, scenarios.length - 1);
+            const scenario = scenarios[scenarioIndex] || scenarios[scenarios.length - 1];
+            
+            document.getElementById('dialogueText').textContent = scenario.text;
+            
+            const choicesDiv = document.getElementById('choices');
+            choicesDiv.innerHTML = '';
+            
+            scenario.choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.className = 'choice-button';
+                button.textContent = choice.text;
+                button.onclick = () => makeChoice(choice.action);
+                choicesDiv.appendChild(button);
+            });
+        }
+
+        function endGame() {
+            gameState.gameOver = true;
+            
+            let summary = "Your life summary: ";
+            
+            if (gameState.money > 100) {
+                summary += "Financially stable but emotionally drained. ";
+            } else if (gameState.money < 0) {
+                summary += "Broke but rich in experience. ";
+            } else {
+                summary += "Barely surviving capitalism. ";
+            }
+            
+            if (gameState.energy < 20) {
+                summary += "Exhausted from the grind. ";
+            }
+            
+            if (gameState.mood < 30) {
+                summary += "Happiness sold separately. ";
+            } else if (gameState.mood > 70) {
+                summary += "Surprisingly optimistic! ";
+            }
+            
+            summary += `\n\nFinal Stats:\nMoney: $${gameState.money}\nEnergy: ${gameState.energy}%\nMood: ${gameState.mood}%\nDays Survived: ${gameState.day}`;
+            
+            const popup = document.createElement('div');
+            popup.className = 'popup-backdrop';
+            popup.innerHTML = `
+                <div class="popup" style="max-width: 500px;">
+                    <h2 style="margin-top: 0;">🎮 GAME OVER 🎮</h2>
+                    <div style="margin: 20px 0; font-size: 16px; line-height: 1.6; white-space: pre-line;">${summary}</div>
+                    <button class="popup-button" onclick="restartGame()">Try Again</button>
+                    <button class="popup-button" onclick="window.open('https://pump.fun', '_blank')" style="margin-left: 10px;">Escape Reality</button>
+                </div>
+            `;
+            
+            document.body.appendChild(popup);
+        }
+
+        function restartGame() {
+            gameState = {
+                day: 1,
+                money: 50,
+                energy: 80,
+                mood: 70,
+                health: 85,
+                decisionsCount: 0,
+                gameOver: false,
+                dayPhase: 'morning',
+                sleepCount: 0,
+                workCount: 0,
+                easterEggsFound: [],
+                achievements: {
+                    days: false,
+                    money: false,
+                    sleep: false,
+                    work: false,
+                    easter: false
+                },
+                lastMiniEvent: 0,
+                delayedConsequences: []
+            };
+            
+            // Remove any existing popups
+            const popups = document.querySelectorAll('.popup-backdrop, .mini-event-popup');
+            popups.forEach(popup => popup.remove());
+            
+            // Reset achievements display
+            document.querySelectorAll('.achievement').forEach(achievement => {
+                achievement.classList.remove('completed');
+            });
+            
+            updateDisplay();
+            
+            // Start with morning scenario
+            const morningScenarios = dayPhaseScenarios.morning;
+            const scenario = morningScenarios[0];
+            
+            document.getElementById('dialogueText').textContent = scenario.text;
+            
+            const choicesDiv = document.getElementById('choices');
+            choicesDiv.innerHTML = '';
+            
+            scenario.choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.className = 'choice-button';
+                button.textContent = choice.text;
+                button.onclick = () => makeChoice(choice.action);
+                choicesDiv.appendChild(button);
+            });
+        }
+
+        // Initialize game
+        updateDisplay();
+        
+        // Start mini-event timer
+        setInterval(triggerMiniEvent, 3000);
+        
+        // Initialize with first morning scenario
+        const morningScenarios = dayPhaseScenarios.morning;
+        const scenario = morningScenarios[0];
+        document.getElementById('dialogueText').textContent = scenario.text;
+        
+        const choicesDiv = document.getElementById('choices');
+        choicesDiv.innerHTML = '';
+        
+        scenario.choices.forEach(choice => {
+            const button = document.createElement('button');
+            button.className = 'choice-button';
+            button.textContent = choice.text;
+            button.onclick = () => makeChoice(choice.action);
+            choicesDiv.appendChild(button);
+        });
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9932f37334c9414b',t:'MTc2MTI0MDUwNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
